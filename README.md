@@ -14,6 +14,11 @@ Ce dépôt rassemble les outils créés durant l’année scolaire. Chaque appli
 - [Les petits problèmes](./petits-problemes/) — neuf problèmes, choix de l’opération et corrections expliquées.
 - [Problèmes multiplicatifs](./problemes-multiplicatifs/) — multiplication ou partage, schémas en barres et correction expliquée en page 2.
 
+### Français
+
+- [Les types de phrases](./types-de-phrases/) — reconnaître une phrase déclarative, interrogative ou impérative.
+- [La ponctuation finale](./ponctuation/) — choisir entre le point, le point d’interrogation et le point d’exclamation.
+
 ## Utiliser le code
 
 Pour essayer une application sur un ordinateur, téléchargez le dépôt puis ouvrez le fichier `index.html` du dossier correspondant dans un navigateur.
