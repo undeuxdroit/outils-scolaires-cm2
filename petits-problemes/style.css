@@ -52,6 +52,15 @@ header {
 }
 
 main { max-width: 900px; margin: 24px auto; padding: 0 24px; }
+.problem-nav {
+  display: grid;
+  grid-template-columns: 54px 1fr 54px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.problem-nav strong { text-align: center; font-size: 1.08rem; }
+.problem-nav button { padding: 8px; font-size: 1.45rem; font-weight: 700; }
 .pages { display: flex; gap: 12px; margin-bottom: 20px; }
 .pages span {
   flex: 1;
@@ -132,6 +141,7 @@ footer { text-align: center; padding: 10px 20px 28px; color: #53637a; font-size:
   header { padding: 14px; }
   .logo { display: none; }
   main { margin: 16px auto; padding: 0 12px; }
+  .problem-nav { grid-template-columns: 50px 1fr 50px; }
   .sheet { padding: 21px 15px; border-radius: 17px; }
   .story { font-size: 1.15rem; }
   .operations { grid-template-columns: 1fr; gap: 9px; }
