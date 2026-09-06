@@ -14,9 +14,15 @@
   </header>
 
   <main>
+    <nav class="problem-nav" aria-label="Choisir un problème">
+      <button id="topPrevious" type="button" aria-label="Problème précédent">←</button>
+      <strong>Problème <span id="navProblemNumber">1</span> sur <span id="navProblemTotal">9</span></strong>
+      <button id="topNext" type="button" aria-label="Problème suivant">→</button>
+    </nav>
+
     <nav class="pages" aria-label="Progression">
-      <span id="page1Tab" class="active">1 · Je cherche</span>
-      <span id="page2Tab">2 · Je comprends</span>
+      <span id="page1Tab" class="active">1 · La question</span>
+      <span id="page2Tab">2 · La réponse</span>
     </nav>
 
     <section id="exercisePage" class="sheet" aria-labelledby="exerciseTitle">
@@ -50,18 +56,17 @@
       <p id="message" class="message" role="status" aria-live="polite"></p>
       <div class="actions">
         <button id="previous" class="quiet" type="button">Précédent</button>
-        <button id="next" class="primary" type="button">Problème suivant</button>
+        <button id="next" class="primary" type="button">Voir la réponse</button>
       </div>
     </section>
 
     <section id="solutionPage" class="sheet" aria-labelledby="solutionTitle" hidden>
-      <p class="eyebrow">Page 2 · Correction expliquée</p>
-      <h1 id="solutionTitle">Les solutions, pas à pas</h1>
-      <p class="intro">Compare tes réponses, puis lis pourquoi chaque opération est utilisée.</p>
-      <div id="solutions" class="solutions"></div>
+      <p class="eyebrow">Réponse du problème <span id="solutionNumber">1</span></p>
+      <h1 id="solutionTitle">La correction expliquée</h1>
+      <div id="solution" class="solutions"></div>
       <div class="actions">
-        <button id="backToExercises" class="quiet" type="button">Retour aux problèmes</button>
-        <button id="tryAgain" class="primary" type="button">Recommencer</button>
+        <button id="backToExercises" class="quiet" type="button">Revoir la question</button>
+        <button id="nextProblem" class="primary" type="button">Problème suivant</button>
       </div>
     </section>
   </main>
