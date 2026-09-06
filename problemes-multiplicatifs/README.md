@@ -5,14 +5,14 @@ Une application pédagogique pour apprendre à reconnaître deux situations :
 - chercher un total avec une multiplication ;
 - chercher la valeur d’une part avec une division.
 
-Chaque problème est présenté en deux pages : recherche et réponse sur la première, puis opération et explication pédagogique sur la seconde. Les schémas en barres reprennent la représentation utilisée en classe.
+Au démarrage, l’enfant choisit un parcours complet :
 
-Pour les multiplications, deux niveaux sont proposés :
+- **niveau 1 — parcours guidé** : les boîtes ou les parts sont déjà dessinées ; l’enfant complète puis calcule ;
+- **niveau 2 — parcours autonome** : l’enfant détermine le nombre de boîtes ou de parts et construit lui-même chaque schéma.
 
-- **niveau 1** : le nombre de boîtes est déjà indiqué et l’élève choisit ce qu’il place dans chaque boîte ;
-- **niveau 2** : l’élève retrouve le nombre de boîtes et leur contenu avant de calculer le total.
+Le niveau choisi reste actif pendant les 12 problèmes. Deux flèches permettent de circuler librement entre les problèmes, et un bouton permet de revenir au choix du niveau.
 
-Deux flèches permettent de passer librement d’un problème à l’autre. L’application propose 12 problèmes progressifs, sans chronomètre et sans enregistrement de données.
+Chaque correction explique l’opération utilisée. L’application fonctionne sans chronomètre et n’enregistre aucune donnée.
 
 ## Utilisation
 
