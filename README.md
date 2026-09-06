@@ -1,2 +1,18 @@
-# outils-scolaires-cm2
-Applications pédagogiques adaptées pour travailler les apprentissages de CM2 à l’écran
+# Outils scolaires CM2
+
+Applications pédagogiques adaptées pour travailler les apprentissages de CM2 à l’écran.
+
+Ce dépôt rassemble les outils créés durant l’année scolaire. Chaque application se trouve dans son propre dossier et peut être utilisée dans un navigateur.
+
+## Applications
+
+### Mathématiques
+
+- [Atelier des grands nombres](./grands-nombres/) — tableau de numération, décomposition et écriture en lettres.
+- [Ouvrir l’application en ligne](https://atelier-grands-nombres.undeuxdroit.chatgpt.site)
+
+## Utiliser le code
+
+Pour essayer une application sur un ordinateur, téléchargez le dépôt puis ouvrez le fichier index.html du dossier correspondant dans un navigateur.
+
+Le code est publié sous [licence MIT](./LICENSE). Il peut être utilisé, copié et adapté en conservant la licence.
