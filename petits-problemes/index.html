@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Les petits problèmes</title>
+  <meta name="description" content="Neuf problèmes de CM2 pour choisir une opération et expliquer son raisonnement.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="logo" aria-hidden="true">?</span> Les petits problèmes</div>
+    <button id="reset" class="quiet" type="button">Recommencer</button>
+  </header>
+
+  <main>
+    <nav class="pages" aria-label="Progression">
+      <span id="page1Tab" class="active">1 · Je cherche</span>
+      <span id="page2Tab">2 · Je comprends</span>
+    </nav>
+
+    <section id="exercisePage" class="sheet" aria-labelledby="exerciseTitle">
+      <div class="heading">
+        <div>
+          <p class="eyebrow">Problème <span id="problemNumber">1</span> sur <span id="problemTotal">9</span></p>
+          <h1 id="exerciseTitle">Lis, choisis, calcule</h1>
+        </div>
+        <button id="speak" class="quiet" type="button" aria-label="Écouter le problème">Écouter</button>
+      </div>
+
+      <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+      <p id="story" class="story"></p>
+
+      <fieldset>
+        <legend>1. Quelle opération vas-tu utiliser ?</legend>
+        <div class="operations">
+          <label><input type="radio" name="operation" value="addition"><span>+</span> Addition</label>
+          <label><input type="radio" name="operation" value="soustraction"><span>−</span> Soustraction</label>
+          <label><input type="radio" name="operation" value="multiplication"><span>×</span> Multiplication</label>
+          <label><input type="radio" name="operation" value="division"><span>÷</span> Division</label>
+        </div>
+      </fieldset>
+
+      <label class="answer-label" for="answer">2. Écris ta réponse</label>
+      <div class="answer-row">
+        <input id="answer" inputmode="decimal" autocomplete="off" placeholder="Ex. 72,5">
+        <span id="unit" class="unit"></span>
+      </div>
+
+      <p id="message" class="message" role="status" aria-live="polite"></p>
+      <div class="actions">
+        <button id="previous" class="quiet" type="button">Précédent</button>
+        <button id="next" class="primary" type="button">Problème suivant</button>
+      </div>
+    </section>
+
+    <section id="solutionPage" class="sheet" aria-labelledby="solutionTitle" hidden>
+      <p class="eyebrow">Page 2 · Correction expliquée</p>
+      <h1 id="solutionTitle">Les solutions, pas à pas</h1>
+      <p class="intro">Compare tes réponses, puis lis pourquoi chaque opération est utilisée.</p>
+      <div id="solutions" class="solutions"></div>
+      <div class="actions">
+        <button id="backToExercises" class="quiet" type="button">Retour aux problèmes</button>
+        <button id="tryAgain" class="primary" type="button">Recommencer</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>Prends ton temps : comprendre l’histoire aide à choisir l’opération.</footer>
+  <script src="app.js"></script>
+</body>
+</html>
