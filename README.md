@@ -13,6 +13,7 @@ Ce dépôt rassemble les outils créés durant l’année scolaire. Chaque appli
 - [Calculs rapides](./calculs-rapides/) — ajouter ou retirer mentalement des dizaines et des centaines, avec trois niveaux progressifs.
 - [Ouvrir Calculs rapides en ligne](https://calculs-rapides-cm2.undeuxdroit.chatgpt.site)
 - [Les petits problèmes](./petits-problemes/) — neuf problèmes, choix de l’opération et corrections expliquées.
+- [Ouvrir Les petits problèmes en ligne](https://petits-problemes-cm2.undeuxdroit.chatgpt.site)
 - [Problèmes multiplicatifs](./problemes-multiplicatifs/) — multiplication ou partage, schémas en barres et correction expliquée en page 2.
 
 ### Français
