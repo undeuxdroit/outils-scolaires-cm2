@@ -9,10 +9,11 @@ Ce dépôt rassemble les outils créés durant l’année scolaire. Chaque appli
 ### Mathématiques
 
 - [Atelier des grands nombres](./grands-nombres/) — tableau de numération, décomposition et écriture en lettres.
-- [Ouvrir l’application en ligne](https://atelier-grands-nombres.undeuxdroit.chatgpt.site)
+- [Ouvrir l’Atelier des grands nombres en ligne](https://atelier-grands-nombres.undeuxdroit.chatgpt.site)
+- [Calculs rapides](./calculs-rapides/) — ajouter ou retirer mentalement des dizaines et des centaines, avec trois niveaux progressifs.
 
 ## Utiliser le code
 
-Pour essayer une application sur un ordinateur, téléchargez le dépôt puis ouvrez le fichier index.html du dossier correspondant dans un navigateur.
+Pour essayer une application sur un ordinateur, téléchargez le dépôt puis ouvrez le fichier `index.html` du dossier correspondant dans un navigateur.
 
 Le code est publié sous [licence MIT](./LICENSE). Il peut être utilisé, copié et adapté en conservant la licence.
