@@ -12,6 +12,7 @@ Ce dépôt rassemble les outils créés durant l’année scolaire. Chaque appli
 - [Ouvrir l’Atelier des grands nombres en ligne](https://atelier-grands-nombres.undeuxdroit.chatgpt.site)
 - [Calculs rapides](./calculs-rapides/) — ajouter ou retirer mentalement des dizaines et des centaines, avec trois niveaux progressifs.
 - [Les petits problèmes](./petits-problemes/) — neuf problèmes, choix de l’opération et corrections expliquées.
+- [Problèmes multiplicatifs](./problemes-multiplicatifs/) — multiplication ou partage, schémas en barres et correction expliquée en page 2.
 
 ## Utiliser le code
 
