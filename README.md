@@ -16,6 +16,11 @@ Ce dépôt rassemble les outils créés durant l’année scolaire. Chaque appli
 - [Ouvrir Les petits problèmes en ligne](https://petits-problemes-cm2.undeuxdroit.chatgpt.site)
 - [Problèmes multiplicatifs](./problemes-multiplicatifs/) — multiplication ou partage, schémas en barres et correction expliquée en page 2.
 
+- [Multiplications classiques — Multimissions](./multiplications/) — une ou plusieurs tables de 2 à 10, avec réponses à choisir puis à saisir, étoiles et révision des erreurs.
+- [Ouvrir les multiplications classiques en ligne](https://undeuxdroit.github.io/outils-scolaires-cm2/multiplications/)
+- [Multiplications à trou — Multimissions](./multiplications-a-trou/) — retrouver le nombre caché, par exemple 8 × … = 24, avec réponses à choisir puis à saisir.
+- [Ouvrir les multiplications à trou en ligne](https://undeuxdroit.github.io/outils-scolaires-cm2/multiplications-a-trou/)
+
 ### Français
 
 - [Les types de phrases](./types-de-phrases/) — reconnaître une phrase déclarative, interrogative ou impérative.

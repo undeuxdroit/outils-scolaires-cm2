@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>🚀 Multimissions — L'aventure des tables</title>
+<style>
+  :root{
+    --bg1:#0b1026; --bg2:#1b2350; --accent:#ffd23f; --good:#3ddc84; --bad:#ff5a7a;
+    --card:#222c5a; --card2:#2c3870; --text:#eef2ff; --muted:#9aa6d6;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
+  html,body{margin:0; height:100%; overflow:hidden;}
+  body{
+    font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;
+    color:var(--text);
+    background:radial-gradient(120% 120% at 50% 0%, var(--bg2) 0%, var(--bg1) 60%, #05071a 100%);
+    touch-action:manipulation;
+  }
+  #stars{position:fixed; inset:0; z-index:0; pointer-events:none;}
+  #app{position:relative; z-index:1; height:100%; display:flex; flex-direction:column;}
+  .screen{flex:1; display:none; flex-direction:column; padding:env(safe-area-inset-top) 16px 16px; overflow-y:auto;}
+  .screen.active{display:flex; animation:fade .35s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+
+  h1{font-size:clamp(26px,6vw,46px); margin:14px 0 4px; text-align:center; letter-spacing:1px;
+     text-shadow:0 3px 0 #00000040;}
+  .subtitle{text-align:center; color:var(--muted); margin:0 0 18px; font-size:clamp(14px,3.5vw,18px);}
+
+  .btn{
+    border:none; border-radius:18px; padding:16px 22px; font-size:clamp(17px,4.5vw,22px);
+    font-weight:bold; font-family:inherit; cursor:pointer; color:#10142f;
+    background:linear-gradient(180deg,#ffe27a,var(--accent));
+    box-shadow:0 6px 0 #c79a18, 0 10px 18px #0006; transition:transform .08s, box-shadow .08s;
+  }
+  .btn:active{transform:translateY(4px); box-shadow:0 2px 0 #c79a18, 0 4px 10px #0006;}
+  .btn.secondary{background:linear-gradient(180deg,#5a6bd8,#3f4fb8); color:#fff; box-shadow:0 6px 0 #2a368a,0 10px 18px #0006;}
+  .btn.secondary:active{box-shadow:0 2px 0 #2a368a,0 4px 10px #0006;}
+
+  /* ---- ACCUEIL ---- */
+  .home-hero{font-size:84px; text-align:center; margin:10px 0; animation:bob 3s ease-in-out infinite;}
+  @keyframes bob{50%{transform:translateY(-12px);}}
+  .home-actions{display:flex; flex-direction:column; gap:14px; max-width:360px; margin:8px auto; width:100%;}
+
+  /* ---- CHOIX DES TABLES ---- */
+  .table-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:12px; max-width:640px; margin:6px auto; width:100%;}
+  .tchip{
+    border:2px solid #ffffff20; border-radius:20px; padding:14px 6px 10px; cursor:pointer; font-family:inherit;
+    background:linear-gradient(180deg,var(--card2),var(--card)); color:#fff; text-align:center;
+    box-shadow:0 6px 12px #0005; transition:transform .08s, border-color .1s;
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+  }
+  .tchip:active{transform:scale(.95);}
+  .tchip .tn{font-size:34px; font-weight:bold; line-height:1;}
+  .tchip .tx{font-size:12px; color:var(--muted);}
+  .tchip.sel{border-color:var(--accent); background:linear-gradient(180deg,#3a3f7e,#2b2f63);
+     box-shadow:0 0 0 3px #ffd23f55, 0 6px 12px #0005;}
+  .tchip.sel .tn{color:var(--accent);}
+  .pick-actions{display:flex; flex-direction:column; gap:12px; max-width:360px; margin:0 auto; width:100%;}
+  .btn.disabled{opacity:.45; filter:grayscale(.5); pointer-events:auto;}
+
+  /* ---- CARTE DES PLANETES ---- */
+  .topbar{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px;}
+  .pill{background:#0003; border:1px solid #ffffff22; border-radius:30px; padding:8px 14px; font-weight:bold; font-size:16px; display:flex; gap:6px; align-items:center;}
+  .map-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:14px; max-width:760px; margin:6px auto; width:100%;}
+  .planet{
+    position:relative; border-radius:22px; padding:14px 10px 12px; text-align:center; cursor:pointer;
+    background:linear-gradient(180deg,var(--card2),var(--card)); border:2px solid #ffffff18;
+    box-shadow:0 8px 16px #0005; transition:transform .1s;
+  }
+  .planet:active{transform:scale(.96);}
+  .planet.locked{filter:grayscale(.8) brightness(.6); cursor:not-allowed;}
+  .planet.locked:active{transform:none;}
+  .planet .emoji{font-size:46px; line-height:1; display:block; margin:2px 0 6px;}
+  .planet .pname{font-weight:bold; font-size:16px;}
+  .planet .ptables{color:var(--muted); font-size:12px; margin-top:2px; min-height:14px;}
+  .planet .stars{margin-top:6px; font-size:16px; letter-spacing:2px; color:var(--accent);}
+  .planet .lock{position:absolute; top:8px; right:10px; font-size:18px;}
+  .planet.boss{background:linear-gradient(180deg,#5b2a6e,#3a1850); border-color:#ffd23f55;}
+
+  /* ---- JEU ---- */
+  .game-top{display:flex; align-items:center; gap:10px; margin-bottom:8px;}
+  .progress-wrap{flex:1; height:18px; background:#0004; border-radius:20px; overflow:hidden; position:relative; border:1px solid #ffffff20;}
+  .progress-bar{height:100%; width:0%; background:linear-gradient(90deg,#3ddc84,#7af);
+     border-radius:20px; transition:width .4s ease;}
+  .rocket-track{position:relative; height:54px; margin:2px 0 6px;}
+  .rocket{position:absolute; bottom:0; left:0%; font-size:34px; transition:left .5s cubic-bezier(.5,-0.2,.3,1.4); transform:translateX(-50%) rotate(45deg);}
+  .flag{position:absolute; right:0; bottom:6px; font-size:26px;}
+
+  .round-tag{text-align:center; font-weight:bold; color:#dbe2ff; background:#ffffff14;
+     border:1px solid #ffffff2a; border-radius:30px; padding:5px 16px; margin:2px auto 2px;
+     font-size:15px; width:max-content; max-width:92%;}
+  .planet .ptables.levels{font-size:11px; color:#ffd23fbb; margin-top:1px;}
+  #reviewBanner{width:100%;}
+  .review-mission{display:flex; align-items:center; gap:12px; width:100%; max-width:760px;
+     margin:0 auto 16px; cursor:pointer; color:#fff; font-family:inherit; text-align:left;
+     background:linear-gradient(180deg,#43308a,#2c1f63); border:2px solid #ffd23f99; border-radius:22px;
+     padding:12px 16px; box-shadow:0 8px 18px #0006; animation:glow 2s ease-in-out infinite;}
+  @keyframes glow{0%,100%{box-shadow:0 8px 18px #0006, 0 0 0 0 #ffd23f55;}
+     50%{box-shadow:0 8px 18px #0006, 0 0 18px 4px #ffd23f55;}}
+  .review-mission:active{transform:scale(.98);}
+  .rm-emoji{font-size:38px; line-height:1;}
+  .rm-text{flex:1; font-size:18px;}
+  .rm-go{font-size:24px;}
+  .mascot{font-size:60px; text-align:center; margin:6px 0 2px; transition:transform .2s; min-height:64px;}
+  .mascot.happy{animation:pop .5s;}
+  .mascot.sad{animation:shake .5s;}
+  @keyframes pop{0%{transform:scale(1);}40%{transform:scale(1.35) rotate(-8deg);}100%{transform:scale(1);}}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-10px);}75%{transform:translateX(10px);}}
+  .speech{text-align:center; color:var(--muted); min-height:22px; font-size:16px; margin-bottom:4px;}
+
+  .question{
+    text-align:center; font-size:clamp(40px,12vw,76px); font-weight:bold; margin:6px 0 14px;
+    text-shadow:0 4px 0 #0005;
+  }
+  .answers{display:grid; grid-template-columns:1fr 1fr; gap:14px; max-width:520px; margin:0 auto; width:100%;}
+  .ans{
+    border:none; border-radius:18px; padding:22px 10px; font-size:clamp(24px,7vw,34px); font-weight:bold;
+    font-family:inherit; cursor:pointer; color:#fff; background:linear-gradient(180deg,#46559f,#34418a);
+    box-shadow:0 6px 0 #232c66,0 8px 14px #0005; transition:transform .08s, box-shadow .08s;
+  }
+  .ans:active{transform:translateY(4px); box-shadow:0 2px 0 #232c66;}
+  .ans.correct{background:linear-gradient(180deg,#4ff0a0,#2bbf6e); box-shadow:0 6px 0 #1c8a4d; color:#06301c;}
+  .ans.wrong{background:linear-gradient(180deg,#ff7d96,#e23e5e); box-shadow:0 6px 0 #a52440;}
+  .ans.dim{opacity:.45;}
+
+  /* clavier saisie */
+  .typed{
+    text-align:center; font-size:clamp(40px,12vw,64px); font-weight:bold; min-height:70px;
+    background:#0003; border-radius:18px; border:2px dashed #ffffff33; max-width:300px; margin:0 auto 12px;
+    display:flex; align-items:center; justify-content:center; letter-spacing:4px;
+  }
+  .keypad{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; max-width:340px; margin:0 auto; width:100%;}
+  .key{
+    border:none; border-radius:16px; padding:20px 0; font-size:30px; font-weight:bold; font-family:inherit;
+    cursor:pointer; color:#10142f; background:linear-gradient(180deg,#e7ecff,#c3cdf2);
+    box-shadow:0 5px 0 #8b97c9; transition:transform .07s, box-shadow .07s;
+  }
+  .key:active{transform:translateY(3px); box-shadow:0 2px 0 #8b97c9;}
+  .key.go{background:linear-gradient(180deg,#ffe27a,var(--accent)); box-shadow:0 5px 0 #c79a18; color:#10142f;}
+  .key.del{background:linear-gradient(180deg,#ff9db0,#f06e88); box-shadow:0 5px 0 #b8455e; color:#fff;}
+
+  .combo-badge{position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:5;
+    background:linear-gradient(180deg,#ffe27a,var(--accent)); color:#10142f; font-weight:bold;
+    padding:8px 18px; border-radius:30px; box-shadow:0 6px 14px #0007; opacity:0; pointer-events:none;
+    font-size:18px;}
+  .combo-badge.show{animation:combo 1.1s ease;}
+  @keyframes combo{0%{opacity:0; transform:translateX(-50%) scale(.5);}20%{opacity:1; transform:translateX(-50%) scale(1.1);}80%{opacity:1;}100%{opacity:0; transform:translateX(-50%) scale(1) translateY(-20px);}}
+
+  /* ---- RESULTAT ---- */
+  .result-card{max-width:420px; margin:auto; text-align:center; background:linear-gradient(180deg,var(--card2),var(--card));
+    border-radius:26px; padding:24px; border:2px solid #ffffff20; box-shadow:0 12px 30px #0007;}
+  .result-stars{font-size:54px; letter-spacing:6px; margin:6px 0; color:var(--accent); min-height:60px;}
+  .result-score{font-size:22px; margin:6px 0;}
+  .result-actions{display:flex; flex-direction:column; gap:12px; margin-top:18px;}
+
+  .small{font-size:14px; color:var(--muted);}
+  .center{text-align:center;}
+  .row{display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
+  .iconbtn{background:#0004; border:1px solid #ffffff22; color:#fff; border-radius:14px; padding:10px 14px; font-size:18px; cursor:pointer; font-family:inherit;}
+  .iconbtn:active{transform:scale(.94);}
+
+  #burst{position:fixed; inset:0; pointer-events:none; z-index:4;}
+.game-link{display:block;text-align:center;text-decoration:none;line-height:1.3;}
+  .question{overflow-wrap:anywhere;}
+  @media(max-width:480px){.question{font-size:clamp(28px,8vw,40px);} .key{padding:14px 0;} .mascot{font-size:44px;min-height:48px;}}
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<canvas id="burst"></canvas>
+<div class="combo-badge" id="comboBadge">🔥 Combo !</div>
+
+<div id="app">
+
+  <!-- ACCUEIL -->
+  <section class="screen active" id="screen-home">
+    <h1>🚀 MULTIMISSIONS</h1>
+    <p class="subtitle">L'aventure des tables de multiplication</p>
+    <div class="home-hero">🤖</div>
+    <div class="home-actions">
+      <a class="iconbtn game-link" href="../">🏠 Tous les outils CM2</a>
+      <a class="iconbtn game-link" href="../multiplications-a-trou/">🧩 Jouer aux multiplications à trou</a>
+      <button class="btn" onclick="goPick()">🎯 Choisir mes tables</button>
+      <button class="btn secondary" onclick="goMap()">🚀 Mode Aventure</button>
+      <button class="btn secondary" onclick="show('screen-how')">❓ Comment jouer</button>
+      <div class="row" style="margin-top:6px">
+        <button class="iconbtn" id="soundBtn" onclick="toggleSound()">🔊 Son</button>
+        <button class="iconbtn" onclick="resetProgress()">🗑️ Recommencer à zéro</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMMENT JOUER -->
+  <section class="screen" id="screen-how">
+    <h1>Comment jouer</h1>
+    <div class="result-card" style="text-align:left">
+      <p>🎯 <b>Choisis tes tables</b> : une seule, plusieurs mélangées, ou « 🎲 Mélange surprise » pour laisser le hasard décider !</p>
+      <p>🚀 Ou pars en <b>Mode Aventure</b> : chaque <b>planète</b> est une table à conquérir.</p>
+      <p>✅ Réponds aux questions pour faire <b>décoller ta fusée</b> jusqu'au drapeau.</p>
+      <p>🔥 Enchaîne les bonnes réponses pour gagner un <b>combo</b> et plus de points !</p>
+      <p>⭐ Gagne jusqu'à <b>3 étoiles</b> par planète. Plus tu es précis, plus tu en gagnes.</p>
+      <p>🌍 Toutes les planètes sont accessibles librement, jusqu’au grand défi final !</p>
+      <p>🎯 Chaque planète a <b>2 niveaux qui s'enchaînent</b> : d'abord tu <b>touches la bonne réponse</b> (Niveau 1), puis tu <b>écris le résultat toi-même</b> (Niveau 2).</p>
+      <p>🔁 À la fin, le robot te <b>repose les questions ratées</b> pour bien les mémoriser !</p>
+      <p>🧠 Le lendemain, une <b>Révision du jour</b> te rappelle les opérations difficiles de la veille — pour ne plus jamais les oublier !</p>
+    </div>
+    <div class="home-actions" style="margin-top:18px">
+      <button class="btn" onclick="show('screen-home')">⬅️ Retour</button>
+    </div>
+  </section>
+
+  <!-- CHOISIR SES TABLES -->
+  <section class="screen" id="screen-pick">
+    <div class="topbar">
+      <button class="iconbtn" onclick="show('screen-home')">🏠</button>
+      <div class="pill">🏅 <span id="totalScore2">0</span></div>
+    </div>
+    <h1 style="font-size:30px; margin:6px 0">🎯 Choisis tes tables</h1>
+    <p class="subtitle" style="margin-bottom:10px">Une seule, plusieurs mélangées, ou laisse le hasard décider !</p>
+    <div class="review-slot"></div>
+    <div class="table-grid" id="tableGrid"></div>
+    <div class="center small" id="pickHint" style="margin:12px 0">Touche une ou plusieurs tables pour commencer.</div>
+    <div class="pick-actions">
+      <button class="btn secondary" onclick="randomTables()">🎲 Mélange surprise</button>
+      <button class="btn disabled" id="startPickBtn" onclick="startPicked()">▶️ C'est parti !</button>
+    </div>
+    <div style="height:16px"></div>
+  </section>
+
+  <!-- CARTE -->
+  <section class="screen" id="screen-map">
+    <div class="topbar">
+      <button class="iconbtn" onclick="show('screen-home')">🏠</button>
+      <div class="pill">⭐ <span id="totalStars">0</span></div>
+      <div class="pill">🏅 <span id="totalScore">0</span></div>
+    </div>
+    <h1 style="font-size:30px; margin:6px 0">🗺️ Carte galactique</h1>
+    <p class="subtitle" style="margin-bottom:10px">Choisis ta mission</p>
+    <div class="review-slot"></div>
+    <div class="map-grid" id="mapGrid"></div>
+    <div style="height:20px"></div>
+  </section>
+
+  <!-- JEU -->
+  <section class="screen" id="screen-game">
+    <div class="game-top">
+      <button class="iconbtn" onclick="quitGame()">⬅️</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="pill" id="qCounter">1/10</div>
+    </div>
+    <div class="rocket-track">
+      <div class="rocket" id="rocket">🚀</div>
+      <div class="flag">🏁</div>
+    </div>
+    <div class="round-tag" id="roundTag"></div>
+    <div class="mascot" id="mascot">🤖</div>
+    <div class="speech" id="speech">Prêt pour le décollage ?</div>
+    <div class="question" id="question">2 × 3</div>
+    <div id="answerArea"></div>
+  </section>
+
+  <!-- RESULTAT -->
+  <section class="screen" id="screen-result">
+    <h1 id="resultTitle">Mission réussie !</h1>
+    <div class="result-card">
+      <div class="result-stars" id="resultStars">⭐⭐⭐</div>
+      <div class="result-score">Score : <b id="resultScore">0</b></div>
+      <div class="small" id="resultDetail"></div>
+      <div class="result-actions">
+        <button class="btn" id="nextBtn" onclick="nextLevel()">➡️ Planète suivante</button>
+        <button class="btn secondary" onclick="replayLevel()">🔁 Rejouer</button>
+        <button class="iconbtn" onclick="goMap()">🗺️ Carte galactique</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* =========================================================
+   MULTIMISSIONS — jeu de tables de multiplication
+   Page web autonome (un seul fichier). Pensé iPad/tactile.
+   ========================================================= */
+
+// ---------- Définition des planètes / niveaux ----------
+// Chaque planète se joue en DEUX niveaux qui s'enchaînent :
+//   Niveau 1 = QCM (4 choix)   →   Niveau 2 = saisie de la réponse (mêmes questions)
+const LEVELS = [
+  {id:'t2', name:'Lunia',   emoji:'🌙', tables:[2]},
+  {id:'t3', name:'Marsia',  emoji:'🔴', tables:[3]},
+  {id:'t4', name:'Aquaria', emoji:'🌊', tables:[4]},
+  {id:'t5', name:'Stellae', emoji:'⭐', tables:[5]},
+  {id:'mix1', name:'Comète A', emoji:'☄️', tables:[2,3,4,5], mix:true},
+  {id:'t6', name:'Ignis',   emoji:'🔥', tables:[6]},
+  {id:'t7', name:'Glacius', emoji:'❄️', tables:[7]},
+  {id:'t8', name:'Ventus',  emoji:'🌀', tables:[8]},
+  {id:'t9', name:'Aurora',  emoji:'🌌', tables:[9]},
+  {id:'mix2', name:'Comète B', emoji:'☄️', tables:[6,7,8,9], mix:true},
+  {id:'boss', name:'Le Trou Noir', emoji:'🕳️', tables:[2,3,4,5,6,7,8,9], mix:true, boss:true},
+];
+
+const QUESTIONS_PER_LEVEL = 15;
+const HIGH_FROM = 6; // "multiplications élevées" = × 6 et plus (au-dessus de ×5)
+
+// ---------- Etat & sauvegarde ----------
+const SAVE_KEY = 'multimissions_v1';
+let save = load();
+function load(){
+  let s = null;
+  try{ s = JSON.parse(localStorage.getItem(SAVE_KEY)); }catch(e){}
+  if(!s || typeof s!=='object') s = {};
+  s.stars = s.stars || {};
+  s.srs   = s.srs   || {};   // planification "courbe de l'oubli" : opérations à revoir
+  if(typeof s.totalScore!=='number') s.totalScore = 0;
+  if(typeof s.sound!=='boolean') s.sound = true;
+  return s;
+}
+function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(e){} }
+
+function isUnlocked(i){
+  return true; // toutes les planètes sont accessibles librement (pas de verrouillage)
+}
+function totalStars(){ return Object.values(save.stars).reduce((a,b)=>a+b,0); }
+
+// ---------- Navigation écrans ----------
+let pendingTransition = null;
+function later(callback, delay){
+  clearTimeout(pendingTransition);
+  pendingTransition = setTimeout(()=>{ pendingTransition=null; callback(); }, delay);
+}
+function show(id){
+  clearTimeout(pendingTransition);
+  pendingTransition=null;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goMap(){ renderMap(); show('screen-map'); }
+
+// ---------- Rendu de la carte ----------
+function renderMap(){
+  document.getElementById('totalStars').textContent = totalStars();
+  document.getElementById('totalScore').textContent = save.totalScore;
+  refreshReviewBanners();
+  const grid = document.getElementById('mapGrid');
+  grid.innerHTML = '';
+  LEVELS.forEach((lv,i)=>{
+    const unlocked = isUnlocked(i);
+    const st = save.stars[lv.id]||0;
+    const div = document.createElement('div');
+    div.className = 'planet' + (unlocked?'':' locked') + (lv.boss?' boss':'');
+    const tablesTxt = lv.mix ? 'Tables '+lv.tables.join(', ') : 'Table de '+lv.tables[0];
+    div.innerHTML = `
+      ${unlocked?'':'<div class="lock">🔒</div>'}
+      <span class="emoji">${lv.emoji}</span>
+      <div class="pname">${lv.name}</div>
+      <div class="ptables">${lv.boss?'⚠️ Toutes les tables':tablesTxt}</div>
+      <div class="ptables levels">🎯 puis ✏️</div>
+      <div class="stars">${'★'.repeat(st)}${'☆'.repeat(3-st)}</div>`;
+    if(unlocked) div.onclick = ()=>startLevel(i);
+    grid.appendChild(div);
+  });
+}
+
+// Bannière "Révision du jour" : visible seulement s'il y a des opérations à revoir
+function reviewBannerHTML(){
+  const due = dueCards();
+  if(due.length===0) return '';
+  const n = due.length;
+  return `<button class="review-mission" onclick="startReview()">
+    <span class="rm-emoji">🧠</span>
+    <span class="rm-text"><b>Révision du jour</b><br>
+      <span class="small">${n} opération${n>1?'s':''} à revoir pour ne pas les oublier</span></span>
+    <span class="rm-go">▶️</span>
+  </button>`;
+}
+function refreshReviewBanners(){
+  document.querySelectorAll('.review-slot').forEach(el=> el.innerHTML = reviewBannerHTML());
+}
+
+// ---------- Écran "Choisis tes tables" (entraînement libre) ----------
+const TABLE_CHOICES = [2,3,4,5,6,7,8,9,10];
+let selectedTables = new Set();
+function goPick(){ renderPick(); show('screen-pick'); }
+function renderPick(){
+  document.getElementById('totalScore2').textContent = save.totalScore;
+  refreshReviewBanners();
+  const grid = document.getElementById('tableGrid');
+  grid.innerHTML = '';
+  TABLE_CHOICES.forEach(t=>{
+    const sel = selectedTables.has(t);
+    const b = document.createElement('button');
+    b.className = 'tchip' + (sel?' sel':'');
+    b.innerHTML = `<span class="tn">${t}</span><span class="tx">la table</span>`;
+    b.onclick = ()=>{
+      if(selectedTables.has(t)) selectedTables.delete(t); else selectedTables.add(t);
+      renderPick();
+    };
+    grid.appendChild(b);
+  });
+  updatePickHint();
+}
+function updatePickHint(){
+  const n = selectedTables.size;
+  const hint = document.getElementById('pickHint');
+  const btn  = document.getElementById('startPickBtn');
+  if(n===0){
+    hint.textContent = 'Touche une ou plusieurs tables pour commencer.';
+    btn.classList.add('disabled');
+  }else{
+    const arr = [...selectedTables].sort((a,b)=>a-b);
+    hint.textContent = (n===1 ? 'Table de '+arr[0] : n+' tables mélangées : '+arr.join(', '));
+    btn.classList.remove('disabled');
+  }
+}
+function startPicked(){
+  if(selectedTables.size===0){
+    const hint = document.getElementById('pickHint');
+    hint.textContent = '👆 Choisis au moins une table !';
+    return;
+  }
+  startCustom([...selectedTables]);
+}
+function randomTables(){
+  const pool = TABLE_CHOICES.slice();
+  shuffle(pool);
+  const k = 2 + Math.floor(rand()*2); // 2 ou 3 tables
+  const chosen = pool.slice(0,k).sort((a,b)=>a-b);
+  selectedTables = new Set(chosen);
+  renderPick();
+  document.getElementById('pickHint').textContent = '🎲 Le hasard a choisi : '+chosen.join(' · ')+' ! Prêt ? 🚀';
+  later(()=>startCustom(chosen), 1300);
+}
+
+// ---------- Logique de jeu ----------
+let G = null; // état de la partie en cours
+
+function buildQuestions(lv){
+  const N = QUESTIONS_PER_LEVEL;            // 15 questions
+  const all = [];
+  lv.tables.forEach(t=>{ for(let b=1;b<=10;b++) all.push({a:t, b:b, answer:t*b}); });
+  const high = all.filter(q=>q.b>=HIGH_FROM); // ×6 à ×10 : les plus difficiles
+  const low  = all.filter(q=>q.b< HIGH_FROM); // ×1 à ×5
+
+  let chosen;
+  if(all.length >= N){
+    // Assez de combinaisons uniques (mélanges de tables) :
+    // on privilégie les multiplications élevées (~60 %), puis on complète.
+    const wantHigh = Math.min(high.length, Math.round(N*0.6));
+    chosen = shuffle(high.slice()).slice(0, wantHigh)
+               .concat(shuffle(low.slice()))
+               .concat(shuffle(high.slice()));     // filet de sécurité
+    chosen = chosen.slice(0, N);
+  }else{
+    // Une seule table (10 combinaisons) : chaque question une fois,
+    // puis les 5 questions en plus reprennent les multiplications élevées (×6 à ×10).
+    chosen = all.slice();
+    const extra = shuffle(high.slice());
+    let i = 0;
+    while(chosen.length < N){ chosen.push(extra[i % extra.length]); i++; }
+  }
+  // mélange en évitant deux questions identiques côte à côte
+  return fewAdjacent(chosen).map(q=>({a:q.a, b:q.b, answer:q.a*q.b}));
+}
+// Mélange qui limite les doublons adjacents (plus agréable à jouer)
+function fewAdjacent(arr){
+  let best = arr, bestBad = Infinity;
+  for(let attempt=0; attempt<8; attempt++){
+    const s = shuffle(arr.slice());
+    let bad = 0;
+    for(let i=1;i<s.length;i++) if(s[i].a===s[i-1].a && s[i].b===s[i-1].b) bad++;
+    if(bad<bestBad){ bestBad=bad; best=s; if(bad===0) break; }
+  }
+  return best;
+}
+
+// Les deux niveaux enchaînés de chaque planète
+const ROUND_INFO = {
+  qcm:  {tag:'🎯 Niveau 1 — Choisis la bonne réponse'},
+  type: {tag:'✏️ Niveau 2 — Écris la réponse'}
+};
+
+function newGame(lv, idx, custom){
+  const base = buildQuestions(lv);
+  return {
+    idx:(idx==null?-1:idx), lv, isReview:false, custom:!!custom,
+    base, rounds:['qcm','type'], roundIdx:0,
+    qs: base.slice(), cur:0, phase:'main',
+    score:0, combo:0, bestCombo:0, locked:false,
+    totalAsked:0, totalCorrect:0,
+    missed:[], retryQueue:[], hadRetry:false
+  };
+}
+function startLevel(i){
+  G = newGame(LEVELS[i], i, false);
+  show('screen-game');
+  startRound();
+}
+// Session personnalisée : une ou plusieurs tables choisies librement
+function startCustom(tables){
+  const sorted = [...new Set(tables)].sort((a,b)=>a-b);
+  const lv = {
+    id:'custom',
+    name: sorted.length>1 ? ('Mélange '+sorted.join(' · ')) : ('Table de '+sorted[0]),
+    tables: sorted, mix: sorted.length>1, custom:true
+  };
+  G = newGame(lv, -1, true);
+  show('screen-game');
+  startRound();
+}
+
+// Lance un niveau (round) : QCM puis saisie, sur les mêmes questions
+function startRound(){
+  G.locked = true;
+  const mode = G.rounds[G.roundIdx];
+  G.qs = G.base.slice();
+  if(mode==='type') shuffle(G.qs);        // on mélange l'ordre au 2e niveau
+  G.cur = 0; G.combo = 0; G.phase = 'main';
+  setRoundTag(ROUND_INFO[mode].tag);
+  document.getElementById('answerArea').innerHTML = '';
+  document.getElementById('question').textContent = ROUND_INFO[mode].tag.split('—')[0].trim();
+  document.getElementById('qCounter').textContent = 'Niveau '+(G.roundIdx+1)+'/'+G.rounds.length;
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('rocket').style.left = '0%';
+  const intro = G.roundIdx===0
+    ? 'Niveau 1 : touche la bonne réponse ! 👆'
+    : 'Niveau 2 : maintenant, écris la réponse toi-même ! ✏️';
+  setMascot('🤖', intro);
+  later(renderQuestion, G.roundIdx===0 ? 700 : 1500);
+}
+
+function replayLevel(){
+  if(!G) return;
+  if(G.isReview) startReview();
+  else if(G.custom) startCustom(G.lv.tables);
+  else startLevel(G.idx);
+}
+function quitGame(){
+  if(G && !G.custom && !G.isReview && G.idx>=0) goMap();
+  else goPick();
+}
+
+function getCurQ(){ return G.phase==='retry' ? G.retryQueue[G.cur] : G.qs[G.cur]; }
+function totalCur(){ return G.phase==='retry' ? G.retryQueue.length : G.qs.length; }
+function curMode(){ return G.phase==='retry' ? (getCurQ().mode||'qcm') : G.rounds[G.roundIdx]; }
+
+function renderQuestion(){
+  const q = getCurQ();
+  const total = totalCur();
+  const mode = curMode();
+  G.locked = false;
+  document.getElementById('qCounter').textContent = (G.phase==='retry'?'🔁 ':'') + (G.cur+1)+'/'+total;
+  document.getElementById('progressBar').style.width = (G.cur/total*100)+'%';
+  document.getElementById('rocket').style.left = (G.cur/total*100)+'%';
+  document.getElementById('question').textContent = q.a+' × '+q.b;
+  const area = document.getElementById('answerArea');
+  if(mode==='qcm') area.innerHTML = renderQCM(q);
+  else renderType(q);
+}
+
+// ----- QCM -----
+function renderQCM(q){
+  const opts = makeOptions(q.answer);
+  const html = '<div class="answers">' + opts.map(o=>
+    `<button class="ans" onclick="answerQCM(this,${o})">${o}</button>`).join('') + '</div>';
+  return html;
+}
+function makeOptions(answer){
+  const set = new Set([answer]);
+  let guard=0;
+  while(set.size<4 && guard<100){
+    guard++;
+    let d;
+    const r = rand();
+    if(r<0.5) d = answer + (Math.floor(rand()*5)-2)* (1+Math.floor(rand()*3));
+    else d = answer + (Math.floor(rand()*9)-4);
+    if(d>0 && d!==answer) set.add(d);
+  }
+  // si pas assez, compléter
+  let n=1;
+  while(set.size<4){ if(answer+n>0) set.add(answer+n); n++; }
+  return shuffle([...set]);
+}
+function answerQCM(btn, val){
+  if(G.locked) return;
+  G.locked = true;
+  const q = getCurQ();
+  const buttons = btn.parentElement.querySelectorAll('.ans');
+  if(val===q.answer){
+    btn.classList.add('correct');
+    buttons.forEach(b=>{ if(b!==btn) b.classList.add('dim'); });
+    onCorrect();
+  }else{
+    btn.classList.add('wrong');
+    buttons.forEach(b=>{
+      if(parseInt(b.textContent)===q.answer) b.classList.add('correct');
+      else if(b!==btn) b.classList.add('dim');
+    });
+    onWrong();
+  }
+}
+
+// ----- Saisie clavier -----
+let typedValue = '';
+function renderType(q){
+  typedValue='';
+  const area = document.getElementById('answerArea');
+  area.innerHTML = `
+    <div class="typed" id="typed">?</div>
+    <div class="keypad">
+      ${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="key" onclick="press('${n}')">${n}</button>`).join('')}
+      <button class="key del" onclick="press('del')">⌫</button>
+      <button class="key" onclick="press('0')">0</button>
+      <button class="key go" onclick="press('ok')">✔️</button>
+    </div>`;
+}
+function press(k){
+  if(!G || G.locked || !document.getElementById('typed')) return;
+  if(k==='del'){ typedValue = typedValue.slice(0,-1); }
+  else if(k==='ok'){ submitTyped(); return; }
+  else if(typedValue.length<4){ typedValue += k; }
+  document.getElementById('typed').textContent = typedValue===''?'?':typedValue;
+}
+function submitTyped(){
+  if(typedValue==='') return;
+  G.locked = true;
+  const q = getCurQ();
+  const val = parseInt(typedValue,10);
+  const typedEl = document.getElementById('typed');
+  if(val===q.answer){
+    typedEl.style.color = '#3ddc84';
+    onCorrect();
+  }else{
+    typedEl.style.color = '#ff5a7a';
+    typedEl.textContent = typedValue+' ✗ → '+q.answer;
+    onWrong();
+  }
+}
+
+// ----- Bonne / mauvaise réponse -----
+function onCorrect(){
+  const q = getCurQ();
+  if(G.phase==='retry'){
+    G.combo = 0;
+    beep(true); confetti();
+    G.score += 5;
+    setMascot(pickHappy(), 'Cette fois c\'est gagné ! 🎉 +5');
+    next(950);
+    return;
+  }
+  G.totalAsked++; G.totalCorrect++;
+  G.combo++;
+  G.bestCombo = Math.max(G.bestCombo, G.combo);
+  let pts = 10 + Math.min(G.combo-1,5)*4; // bonus combo
+  G.score += pts;
+  beep(true);
+  if(G.combo>=3){ showCombo(G.combo); confetti(); }
+  setMascot(pickHappy(), pickPraise()+' +'+pts);
+  if(G.isReview) reviewSuccess(q);   // révision réussie → on espace la prochaine (Ebbinghaus)
+  next(900);
+}
+function onWrong(){
+  const q = getCurQ();
+  G.combo = 0;
+  beep(false);
+  if(G.phase==='retry'){
+    // pas encore réussie → on la garde pour un nouveau rattrapage
+    if(!G.retryWrong.some(m=>m.a===q.a && m.b===q.b))
+      G.retryWrong.push({a:q.a, b:q.b, answer:q.answer, mode:q.mode||curMode()});
+    setMascot('💪','Presque : '+q.a+' × '+q.b+' = '+q.answer+'. On réessaie ! 😉');
+    next(1700);
+    return;
+  }
+  G.totalAsked++;
+  setMascot('😅','Presque ! '+q.a+' × '+q.b+' = '+q.answer);
+  scheduleMiss(q);   // planifie la révision dès demain (courbe de l'oubli)
+  if(!G.missed.some(m=>m.a===q.a && m.b===q.b))
+    G.missed.push({a:q.a, b:q.b, answer:q.answer, mode:curMode()}); // rattrapage en fin de session
+  next(1600);
+}
+function next(delay){
+  const total = totalCur();
+  document.getElementById('progressBar').style.width = ((G.cur+1)/total*100)+'%';
+  document.getElementById('rocket').style.left = ((G.cur+1)/total*100)+'%';
+  later(()=>{
+    G.cur++;
+    if(G.phase==='retry'){
+      if(G.cur>=G.retryQueue.length){
+        // fin d'une passe : s'il reste des erreurs, on relance un rattrapage
+        if(G.retryWrong.length>0) beginRetryPass(G.retryWrong.slice(), true);
+        else finishLevel();
+      }else renderQuestion();
+      return;
+    }
+    // --- phase principale ---
+    if(G.cur < G.qs.length){ renderQuestion(); return; }
+    // round terminé : enchaîne le niveau suivant (QCM → saisie)
+    if(!G.isReview && G.roundIdx < G.rounds.length-1){
+      G.roundIdx++;
+      startRound();
+      return;
+    }
+    // tous les niveaux finis
+    if(G.isReview) finishReview();
+    else startRetry();
+  }, delay);
+}
+
+// Rattrapage : on repose les questions ratées, puis on RECOMMENCE
+// tant qu'il reste des erreurs (jusqu'à ce que tout soit réussi).
+function startRetry(){
+  if(G.missed.length===0){ finishLevel(); return; }
+  G.hadRetry = true;
+  G.retryRound = 0;
+  beginRetryPass(G.missed.slice(), false);
+}
+function beginRetryPass(queue, isExtra){
+  G.locked = true;
+  G.phase = 'retry';
+  G.retryQueue = queue;
+  G.retryWrong = [];     // erreurs de CETTE passe → prochaine passe
+  G.cur = 0;
+  G.combo = 0;
+  G.retryRound = (G.retryRound||0) + 1;
+  const n = queue.length;
+  setRoundTag(isExtra ? '🔁 On réessaie encore !' : '🔁 Rattrapage des erreurs');
+  document.getElementById('answerArea').innerHTML = '';
+  document.getElementById('question').textContent = '🔁 Rattrapage';
+  document.getElementById('qCounter').textContent = '🔁';
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('rocket').style.left = '0%';
+  const msg = isExtra
+    ? 'On retente '+(n>1?('les '+n+' opérations'):'la dernière opération')+' pas encore réussie'+(n>1?'s':'')+' ! 💪'
+    : 'On revoit ensemble '+(n>1?('les '+n+' questions ratées'):'la question ratée')+' ! 💪';
+  setMascot('🤖', msg);
+  later(renderQuestion, 1700);
+}
+
+// =======================================================
+//  RÉVISION ESPACÉE — courbe de l'oubli (Ebbinghaus)
+//  Une opération ratée revient J+1, puis J+2, J+4, J+7,
+//  J+15... à chaque réussite. Après plusieurs réussites
+//  d'affilée, elle est considérée comme mémorisée.
+// =======================================================
+const SRS_INTERVALS = [1,2,4,7,15,30]; // en jours
+function srsKey(q){ return q.a+'x'+q.b; }
+function dateStr(addDays){
+  const d = new Date(); d.setDate(d.getDate()+addDays);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function todayStr(){ return dateStr(0); }
+
+function scheduleMiss(q){            // erreur → à revoir dès demain
+  const k = srsKey(q);
+  const c = save.srs[k] || {a:q.a, b:q.b, answer:q.a*q.b, streak:0, lapses:0};
+  c.streak = 0; c.interval = 1; c.lapses = (c.lapses||0)+1;
+  c.due = dateStr(1);
+  save.srs[k] = c; persist();
+}
+function reviewSuccess(q){           // révision réussie → on espace la prochaine
+  const k = srsKey(q); const c = save.srs[k]; if(!c) return;
+  c.streak = (c.streak||0)+1;
+  if(c.streak >= 4){ delete save.srs[k]; persist(); return; } // mémorisé !
+  c.interval = SRS_INTERVALS[Math.min(c.streak, SRS_INTERVALS.length-1)];
+  c.due = dateStr(c.interval);
+  save.srs[k] = c; persist();
+}
+function dueCards(){                 // opérations à revoir aujourd'hui (ou en retard)
+  const t = todayStr();
+  return Object.values(save.srs).filter(c => c.due && c.due <= t);
+}
+
+// La mission "Révision du jour" : on repose les opérations dues
+function startReview(){
+  const due = dueCards();
+  if(due.length===0){ goMap(); return; }
+  const cards = shuffle(due.slice()).slice(0,12);   // 12 max pour rester court
+  const base = cards.map(c => ({a:c.a, b:c.b, answer:c.a*c.b}));
+  G = {
+    isReview:true, lv:{id:'review', name:'Révision'},
+    base, rounds:['qcm'], roundIdx:0,
+    qs: base.slice(), cur:0, phase:'main',
+    score:0, combo:0, bestCombo:0, locked:false,
+    totalAsked:0, totalCorrect:0,
+    missed:[], retryQueue:[], hadRetry:false
+  };
+  show('screen-game');
+  setRoundTag('🧠 Révision du jour');
+  document.getElementById('answerArea').innerHTML = '';
+  document.getElementById('question').textContent = '🧠 Révision';
+  document.getElementById('qCounter').textContent = '🧠';
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('rocket').style.left = '0%';
+  setMascot('🤖','On revoit les opérations d\'hier pour ne pas les oublier ! 🧠');
+  later(renderQuestion, 1700);
+}
+function finishReview(){
+  persist();
+  const total = G.totalAsked, good = G.totalCorrect;
+  document.getElementById('resultStars').textContent = '🧠';
+  document.getElementById('resultScore').textContent = G.score;
+  document.getElementById('resultTitle').textContent = '🧠 Révision terminée !';
+  document.getElementById('resultDetail').textContent =
+    good+'/'+total+' opérations réussies. ' +
+    (good===total ? 'Bravo, tout est bien frais dans ta tête ! 🌟'
+                  : 'Les ratées reviendront demain pour bien les ancrer. 💪');
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.style.display = 'block';
+  nextBtn.textContent = '🗺️ Aller à la carte';
+  nextBtn.onclick = goMap;
+  confetti(true);
+  show('screen-result');
+}
+
+function setRoundTag(t){
+  const el = document.getElementById('roundTag');
+  el.textContent = t || '';
+  el.style.display = t ? 'block' : 'none';
+}
+
+// ----- Fin de niveau -----
+function finishLevel(){
+  const lv = G.lv;
+  const acc = G.totalAsked ? G.totalCorrect/G.totalAsked : 0; // sur les 2 niveaux
+  let stars = 0;
+  if(acc>=0.6) stars=1;
+  if(acc>=0.8) stars=2;
+  if(acc>=1.0 || (acc>=0.9 && G.bestCombo>=6)) stars=3;
+
+  if(G.custom){
+    // entraînement libre : pas de progression de planète, mais on garde le score
+    save.totalScore += G.score; persist();
+  }else{
+    // étoiles de planète : on garde le meilleur
+    const prevStars = save.stars[lv.id]||0;
+    if(stars>prevStars) save.totalScore += G.score;       // progression réelle
+    else                save.totalScore += Math.floor(G.score/3); // rejeu réduit
+    save.stars[lv.id] = Math.max(prevStars, stars);
+    persist();
+  }
+
+  document.getElementById('resultStars').textContent = '★'.repeat(stars)+'☆'.repeat(3-stars);
+  document.getElementById('resultScore').textContent = G.score;
+  document.getElementById('resultTitle').textContent =
+    stars===3 ? '🏆 Mission parfaite !' : stars>=1 ? '🎉 Mission réussie !' : '💪 Continue à t\'entraîner !';
+  document.getElementById('resultDetail').textContent =
+    G.totalCorrect+'/'+G.totalAsked+' bonnes réponses (2 niveaux) · meilleur combo : '+G.bestCombo
+    + (G.hadRetry ? ' · rattrapage effectué 🔁' : '');
+
+  const nextBtn = document.getElementById('nextBtn');
+  if(G.custom){
+    nextBtn.style.display='block';
+    nextBtn.textContent='🎯 Choisir d\'autres tables';
+    nextBtn.onclick=goPick;
+  }else{
+    const hasNext = G.idx < LEVELS.length-1;
+    nextBtn.onclick = nextLevel;
+    nextBtn.textContent = '➡️ Planète suivante';
+    if(stars>=1 && hasNext){ nextBtn.style.display='block'; }
+    else if(!hasNext && stars>=1){
+      nextBtn.style.display='block';
+      nextBtn.textContent='🏆 Tu as fini l\'aventure !';
+      nextBtn.onclick=goMap;
+    } else { nextBtn.style.display='none'; }
+  }
+
+  if(stars>=2) confetti(true);
+  show('screen-result');
+}
+function nextLevel(){
+  const ni = G.idx+1;
+  if(ni<LEVELS.length){ startLevel(ni); }
+  else goMap();
+}
+
+// ---------- Mascotte ----------
+function setMascot(face, text){
+  const m = document.getElementById('mascot');
+  m.textContent = face;
+  m.classList.remove('happy','sad');
+  void m.offsetWidth;
+  m.classList.add(face==='😅'?'sad':'happy');
+  document.getElementById('speech').textContent = text;
+}
+const HAPPY=['🤖','😄','🚀','🌟','😎','🦾'];
+const PRAISE=['Bravo !','Super !','Génial !','Excellent !','Top !','Bien joué !','Parfait !'];
+function pickHappy(){ return HAPPY[Math.floor(rand()*HAPPY.length)]; }
+function pickPraise(){ return PRAISE[Math.floor(rand()*PRAISE.length)]; }
+
+function showCombo(n){
+  const b = document.getElementById('comboBadge');
+  b.textContent = '🔥 Combo x'+n+' !';
+  b.classList.remove('show'); void b.offsetWidth; b.classList.add('show');
+}
+
+// ---------- Son (WebAudio, beeps simples) ----------
+let actx=null;
+function beep(good){
+  if(!save.sound) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.connect(g); g.connect(actx.destination);
+    if(good){ o.frequency.value=660; o.frequency.setValueAtTime(660,actx.currentTime);
+      o.frequency.setValueAtTime(880,actx.currentTime+0.09); }
+    else { o.type='sawtooth'; o.frequency.value=200; }
+    g.gain.setValueAtTime(0.001,actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.18,actx.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+0.25);
+    o.start(); o.stop(actx.currentTime+0.26);
+  }catch(e){}
+}
+function toggleSound(){
+  save.sound=!save.sound; persist();
+  document.getElementById('soundBtn').textContent = save.sound?'🔊 Son':'🔇 Muet';
+  if(save.sound) beep(true);
+}
+
+// ---------- Confettis / étoiles filantes ----------
+const burst = document.getElementById('burst');
+const bctx = burst.getContext('2d');
+let particles=[];
+function confetti(big){
+  const n = big?80:24;
+  const cols=['#ffd23f','#3ddc84','#7af','#ff5a7a','#fff'];
+  for(let i=0;i<n;i++){
+    particles.push({
+      x:innerWidth/2+(rand()-0.5)*120, y:innerHeight*0.35,
+      vx:(rand()-0.5)*8, vy:-(rand()*9+4), g:0.28,
+      s:rand()*6+3, c:cols[Math.floor(rand()*cols.length)], life:60
+    });
+  }
+}
+function tickBurst(){
+  bctx.clearRect(0,0,burst.width,burst.height);
+  particles.forEach(p=>{ p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.life--;
+    bctx.fillStyle=p.c; bctx.fillRect(p.x,p.y,p.s,p.s); });
+  particles=particles.filter(p=>p.life>0 && p.y<innerHeight+20);
+  requestAnimationFrame(tickBurst);
+}
+
+// ---------- Fond étoilé ----------
+const starsCv=document.getElementById('stars'), sctx=starsCv.getContext('2d');
+let starField=[];
+function initStars(){
+  resizeCanvas();
+  starField=[];
+  for(let i=0;i<120;i++) starField.push({x:rand()*innerWidth,y:rand()*innerHeight,r:rand()*1.6+0.3,tw:rand()*Math.PI*2});
+}
+function resizeCanvas(){
+  [starsCv,burst].forEach(c=>{ c.width=innerWidth; c.height=innerHeight; });
+}
+let t=0;
+function tickStars(){
+  t+=0.02;
+  sctx.clearRect(0,0,starsCv.width,starsCv.height);
+  starField.forEach(s=>{
+    const a=0.4+0.6*Math.abs(Math.sin(s.tw+t));
+    sctx.globalAlpha=a; sctx.fillStyle='#fff';
+    sctx.beginPath(); sctx.arc(s.x,s.y,s.r,0,7); sctx.fill();
+  });
+  sctx.globalAlpha=1;
+  requestAnimationFrame(tickStars);
+}
+window.addEventListener('resize', ()=>{ resizeCanvas(); initStars(); });
+
+// ---------- Reset ----------
+function resetProgress(){
+  if(confirm('Effacer toute la progression et recommencer à zéro ?')){
+    save={stars:{}, totalScore:0, srs:{}, sound:save.sound};
+    persist(); renderMap();
+    alert('C\'est reparti pour une nouvelle aventure ! 🚀');
+  }
+}
+
+// ---------- Petits utilitaires ----------
+function rand(){ return Math.random(); }
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(rand()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+
+// Physical keyboards also work on computers.
+window.addEventListener('keydown', event=>{
+  if(!document.getElementById('screen-game').classList.contains('active') || !document.getElementById('typed')) return;
+  if(/^[0-9]$/.test(event.key)){ event.preventDefault(); press(event.key); }
+  else if(event.key==='Backspace'){ event.preventDefault(); press('del'); }
+  else if(event.key==='Enter'){ event.preventDefault(); press('ok'); }
+});
+// ---------- Init ----------
+document.getElementById('soundBtn').textContent = save.sound?'🔊 Son':'🔇 Muet';
+initStars(); tickStars(); tickBurst();
+</script>
+</body>
+</html>
