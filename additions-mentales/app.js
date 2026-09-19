@@ -1,0 +1,11 @@
+const TOTAL=10;let step=0,score=0,current=null,answered=false;
+const $=s=>document.querySelector(s),rand=(min,max)=>Math.floor(Math.random()*(max-min+1))+min;
+function makeQuestion(){const result=rand(3,20),a=rand(1,result-1),b=result-a;return{a,b,result};}
+function renderDots(){$('.dots').innerHTML=Array.from({length:TOTAL},(_,i)=>`<span class="dot ${i<step?'done':''}"></span>`).join('')}
+function newQuestion(){current=makeQuestion();answered=false;$('.count').textContent=`Question ${step+1} sur ${TOTAL}`;$('.bar').style.width=`${(step+1)*10}%`;$('.feedback').textContent='';$('.feedback').className='feedback';$('.next').style.display='none';$('.check').style.display='inline-block';$('.answer').disabled=false;$('.answer').value='';window.showQuestion(current);renderDots();setTimeout(()=>$('.answer').focus(),60)}
+function check(){if(answered)return;const v=Number($('.answer').value);if($('.answer').value===''||!Number.isInteger(v)){setFeedback('Écris un nombre pour répondre.','no');return}answered=true;$('.answer').disabled=true;$('.check').style.display='none';if(v===window.correctAnswer(current)){score++;setFeedback(`Bravo ! ${window.explain(current)}`,'ok')}else setFeedback(`Pas tout à fait. ${window.explain(current)}`,'no');$('.next').style.display='inline-block';$('.next').focus()}
+function setFeedback(t,c){$('.feedback').textContent=t;$('.feedback').className=`feedback ${c}`}
+function next(){step++;if(step<TOTAL)newQuestion();else finish()}
+function finish(){$('.quiz').style.display='none';$('.summary').style.display='block';$('.score').textContent=`${score} / ${TOTAL}`;$('.message').textContent=score===10?'Excellent, tout est juste !':score>=7?'Bravo, tu progresses très bien !':'Bien joué ! Recommence pour devenir encore plus rapide.'}
+function restart(){step=0;score=0;$('.summary').style.display='none';$('.quiz').style.display='block';newQuestion()}
+$('.check').addEventListener('click',check);$('.next').addEventListener('click',next);$('.restart').addEventListener('click',restart);$('.answer').addEventListener('keydown',e=>{if(e.key==='Enter')answered?next():check()});$('.hint').addEventListener('click',()=>setFeedback(window.hint(current),'ok'));newQuestion();
